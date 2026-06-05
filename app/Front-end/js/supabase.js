@@ -6,140 +6,130 @@ const SUPABASE_KEY  = window.ENV_SUPABASE_KEY || 'sb_publishable_aVjht0ulBEZ5VpY
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── Auth helpers ──────────────────────────────────────
+// ── Mock Auth (para testes locais) ──────────────────────
+let mockUser = JSON.parse(localStorage.getItem('mockUser'));
 
 export async function signUp(email, password, name) {
-  const { data, error } = await supabase.auth.signUp({
-    email, password,
-    options: { data: { name } },
-  });
-  return { data, error };
+  if (!email || !password || !name) {
+    return { error: { message: 'Preenche todos os campos' } };
+  }
+
+  mockUser = {
+    id: 'mock-' + Date.now(),
+    email,
+    user_metadata: { name },
+    created_at: new Date().toISOString()
+  };
+
+  localStorage.setItem('mockUser', JSON.stringify(mockUser));
+  localStorage.setItem('mockPassword', password);
+
+  return { data: { user: mockUser }, error: null };
 }
 
 export async function signIn(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  return { data, error };
+  const stored = JSON.parse(localStorage.getItem('mockUser'));
+  const storedPassword = localStorage.getItem('mockPassword');
+
+  if (!stored || stored.email !== email || storedPassword !== password) {
+    return { error: { message: 'Email ou password incorretos' } };
+  }
+
+  mockUser = stored;
+  return { data: { user: mockUser }, error: null };
 }
 
 export async function signOut() {
-  await supabase.auth.signOut();
+  mockUser = null;
+  localStorage.removeItem('mockUser');
+  localStorage.removeItem('mockPassword');
   window.location.href = '/index.html';
 }
 
 export async function getUser() {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  if (!mockUser) {
+    mockUser = JSON.parse(localStorage.getItem('mockUser'));
+  }
+  return mockUser;
 }
 
 export async function getProfile() {
   const user = await getUser();
   if (!user) return null;
-  const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-  return data;
+
+  return {
+    id: user.id,
+    name: user.user_metadata?.name || 'Utilizador',
+    created_at: user.created_at
+  };
 }
 
 // ── Workout helpers ───────────────────────────────────
 
 export async function saveWorkoutSession({ name, duration_min, exercises }) {
-  const user = await getUser();
-  if (!user) return { error: 'Não autenticado' };
-
-  // Cria a sessão
-  const { data: session, error } = await supabase
-    .from('workout_sessions')
-    .insert({ user_id: user.id, name, duration_min })
-    .select()
-    .single();
-
-  if (error) return { error };
-
-  // Guarda exercícios e séries
-  for (const ex of exercises) {
-    const { data: sessionEx } = await supabase
-      .from('session_exercises')
-      .insert({ session_id: session.id, exercise_name: ex.name, muscle_group: ex.muscle })
-      .select()
-      .single();
-
-    if (sessionEx && ex.sets?.length) {
-      const setsData = ex.sets.map((s, i) => ({
-        exercise_id: sessionEx.id,
-        set_number: i + 1,
-        reps: s.reps || null,
-        weight_kg: s.weight || null,
-      }));
-      await supabase.from('exercise_sets').insert(setsData);
-    }
-  }
+  // Mock: guardar em localStorage
+  const sessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+  const session = {
+    id: 'session-' + Date.now(),
+    user_id: mockUser?.id,
+    name,
+    duration_min,
+    exercises,
+    created_at: new Date().toISOString()
+  };
+  sessions.push(session);
+  localStorage.setItem('workoutSessions', JSON.stringify(sessions));
 
   return { data: session };
 }
 
 export async function getWorkoutHistory(limit = 10) {
-  const user = await getUser();
-  if (!user) return [];
-  const { data } = await supabase
-    .from('workout_sessions')
-    .select('*, session_exercises(*, exercise_sets(*))')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  return data || [];
+  const sessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+  return sessions.filter(s => s.user_id === mockUser?.id).slice(-limit);
 }
 
 // ── Chat helpers ──────────────────────────────────────
 
 export async function saveChatMessage(role, content) {
-  const user = await getUser();
-  if (!user) return;
-  await supabase.from('chat_messages').insert({ user_id: user.id, role, content });
+  const messages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+  messages.push({
+    id: 'msg-' + Date.now(),
+    user_id: mockUser?.id,
+    role,
+    content,
+    created_at: new Date().toISOString()
+  });
+  localStorage.setItem('chatMessages', JSON.stringify(messages));
 }
 
 export async function getChatHistory(limit = 50) {
-  const user = await getUser();
-  if (!user) return [];
-  const { data } = await supabase
-    .from('chat_messages')
-    .select('role, content')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: true })
-    .limit(limit);
-  return data || [];
+  const messages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+  return messages.filter(m => m.user_id === mockUser?.id).slice(-limit);
 }
 
 // ── Progress photos helpers ───────────────────────────
 
 export async function uploadProgressPhoto(file, analysis) {
-  const user = await getUser();
-  if (!user) return { error: 'Não autenticado' };
+  const photos = JSON.parse(localStorage.getItem('progressPhotos') || '[]');
 
-  const fileName = `${user.id}/${Date.now()}.jpg`;
-  const { error: uploadError } = await supabase.storage
-    .from('progress-photos')
-    .upload(fileName, file, { contentType: file.type });
-
-  if (uploadError) return { error: uploadError };
-
-  const { data: { publicUrl } } = supabase.storage
-    .from('progress-photos')
-    .getPublicUrl(fileName);
-
-  const { data, error } = await supabase
-    .from('progress_photos')
-    .insert({ user_id: user.id, photo_url: publicUrl, ai_analysis: analysis })
-    .select()
-    .single();
-
-  return { data, error };
+  const reader = new FileReader();
+  return new Promise((resolve) => {
+    reader.onload = (e) => {
+      photos.push({
+        id: 'photo-' + Date.now(),
+        user_id: mockUser?.id,
+        photo_url: e.target.result,
+        ai_analysis: analysis,
+        created_at: new Date().toISOString()
+      });
+      localStorage.setItem('progressPhotos', JSON.stringify(photos));
+      resolve({ data: photos[photos.length - 1] });
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 export async function getProgressPhotos() {
-  const user = await getUser();
-  if (!user) return [];
-  const { data } = await supabase
-    .from('progress_photos')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
-  return data || [];
+  const photos = JSON.parse(localStorage.getItem('progressPhotos') || '[]');
+  return photos.filter(p => p.user_id === mockUser?.id);
 }
