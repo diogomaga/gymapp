@@ -1,7 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const SUPABASE_URL  = window.ENV_SUPABASE_URL;
-const SUPABASE_KEY  = window.ENV_SUPABASE_KEY;
+// Lê variáveis de ambiente (injetadas por /env.js) ou usa fallback
+const SUPABASE_URL  = window.ENV_SUPABASE_URL || 'https://uepyxgizdwvdwhclsmcc.supabase.co';
+const SUPABASE_KEY  = window.ENV_SUPABASE_KEY || 'sb_publishable_aVjht0ulBEZ5VpYAC4Twxg_CXTYN2r0';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
