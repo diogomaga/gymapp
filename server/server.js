@@ -1,4 +1,8 @@
-require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+// Load .env locally, but Render provides env vars directly
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
+}
+
 const express  = require('express');
 const path     = require('path');
 const multer   = require('multer');
@@ -15,9 +19,9 @@ app.use(express.static(path.join(__dirname, '../app/Front-end')));
 app.get('/env.js', (_req, res) => {
   res.type('application/javascript');
   res.send(`
-    window.ENV_SUPABASE_URL  = "${process.env.SUPABASE_URL}";
-    window.ENV_SUPABASE_KEY  = "${process.env.SUPABASE_ANON_KEY}";
-    window.ENV_GEMINI_KEY    = "${process.env.GEMINI_API_KEY}";
+    window.ENV_SUPABASE_URL  = "${process.env.SUPABASE_URL || ''}";
+    window.ENV_SUPABASE_KEY  = "${process.env.SUPABASE_ANON_KEY || ''}";
+    window.ENV_GEMINI_KEY    = "${process.env.GEMINI_API_KEY || ''}";
   `);
 });
 
