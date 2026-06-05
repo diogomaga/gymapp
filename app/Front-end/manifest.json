@@ -1,0 +1,24 @@
+{
+  "name": "Gym App",
+  "short_name": "GymApp",
+  "description": "O teu treino no bolso",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#13131f",
+  "theme_color": "#FFD500",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background full bleed (maskable — conteúdo dentro dos 80% centrais) -->
+  <rect width="512" height="512" fill="#13131f"/>
+  <!-- Speed lines -->
+  <line x1="0" y1="100" x2="512" y2="0"   stroke="rgba(255,213,0,0.06)" stroke-width="40"/>
+  <line x1="0" y1="260" x2="512" y2="160" stroke="rgba(255,213,0,0.06)" stroke-width="40"/>
+  <line x1="0" y1="420" x2="512" y2="320" stroke="rgba(255,213,0,0.06)" stroke-width="40"/>
+  <!-- Yellow circle (dentro da safe zone: padding ~52px) -->
+  <circle cx="256" cy="256" r="150" fill="#FFD500" stroke="#13131f" stroke-width="12"/>
+  <!-- G letter -->
+  <text
+    x="256" y="318"
+    text-anchor="middle"
+    font-family="Arial Black, Impact, sans-serif"
+    font-size="190"
+    font-weight="900"
+    fill="#13131f"
+    letter-spacing="-6"
+  >G</text>
+</svg>

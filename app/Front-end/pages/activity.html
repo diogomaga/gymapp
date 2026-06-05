@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gym App | Treino de Hoje</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#FFD500" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GymApp" />
+  <link rel="apple-touch-icon" href="../icons/icon.svg" />
+</head>
+
+<body>
+
+  <main class="app-page">
+    <section class="app-screen">
+
+      <!-- Header -->
+      <header class="act-header">
+        <p class="act-greeting" id="act-greeting-name">Bom treino, João</p>
+        <button class="act-avatar-btn" aria-label="Perfil">
+          <span class="avatar-ring">
+            <span class="avatar-initials">JO</span>
+          </span>
+          <span class="avatar-status" aria-hidden="true"></span>
+        </button>
+      </header>
+
+      <!-- Seletor de dias -->
+      <div class="day-selector" id="day-selector" role="list" aria-label="Seletor de dias"></div>
+
+      <!-- Treino do dia (abaixo dos dias) -->
+      <div class="workout-context">
+        <div class="workout-context-chips">
+          <span class="wchip wchip--coral">🔥 Peito</span>
+          <span class="wchip wchip--teal">💪 Bícep</span>
+        </div>
+        <span class="workout-context-meta">7 exercícios &nbsp;·&nbsp; ~55 min</span>
+      </div>
+
+      <!-- Lista de exercícios -->
+      <ul class="exercise-list" id="exercise-list">
+
+        <li class="exercise-card" data-id="0" data-group="peito">
+          <span class="ex-num">1</span>
+          <div class="ex-thumb">🏋️</div>
+          <div class="ex-info">
+            <span class="ex-name">Supino Plano</span>
+            <span class="ex-muscle-tag ex-muscle-tag--coral">Peito</span>
+          </div>
+          <div class="ex-right">
+            <span class="ex-sets">4×10</span>
+            <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </li>
+
+        <li class="exercise-card" data-id="1" data-group="peito">
+          <span class="ex-num">2</span>
+          <div class="ex-thumb">📐</div>
+          <div class="ex-info">
+            <span class="ex-name">Supino Inclinado</span>
+            <span class="ex-muscle-tag ex-muscle-tag--coral">Peito Superior</span>
+          </div>
+          <div class="ex-right">
+            <span class="ex-sets">3×12</span>
+            <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </li>
+
+        <li class="exercise-card" data-id="2" data-group="peito">
+          <span class="ex-num">3</span>
+          <div class="ex-thumb">🦅</div>
+          <div class="ex-info">
+            <span class="ex-name">Crucifixo</span>
+            <span class="ex-muscle-tag ex-muscle-tag--coral">Peito</span>
+          </div>
+          <div class="ex-right">
+            <span class="ex-sets">3×15</span>
+            <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </li>
+
+        <li class="exercise-card" data-id="3" data-group="peito">
+          <span class="ex-num">4</span>
+          <div class="ex-thumb">💥</div>
+          <div class="ex-info">
+            <span class="ex-name">Flexões</span>
+            <span class="ex-muscle-tag ex-muscle-tag--coral">Peito / Trícep</span>
+          </div>
+          <div class="ex-right">
+            <span class="ex-sets">3×20</span>
+            <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </li>
+
+        <li class="exercise-card" data-id="4" data-group="bicep">
+          <span class="ex-num">5</span>
+          <div class="ex-thumb">💪</div>
+          <div class="ex-info">
+            <span class="ex-name">Rosca Direta</span>
+            <span class="ex-muscle-tag ex-muscle-tag--teal">Bícep</span>
+          </div>
+          <div class="ex-right">
+            <span class="ex-sets">4×12</span>
+            <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </li>
+
+        <li class="exercise-card" data-id="5" data-group="bicep">
+          <span class="ex-num">6</span>
+          <div class="ex-thumb">🔄</div>
+          <div class="ex-info">
+            <span class="ex-name">Rosca Alternada</span>
+            <span class="ex-muscle-tag ex-muscle-tag--teal">Bícep</span>
+          </div>
+          <div class="ex-right">
+            <span class="ex-sets">3×10</span>
+            <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </li>
+
+        <li class="exercise-card" data-id="6" data-group="bicep">
+          <span class="ex-num">7</span>
+          <div class="ex-thumb">🔨</div>
+          <div class="ex-info">
+            <span class="ex-name">Rosca Martelo</span>
+            <span class="ex-muscle-tag ex-muscle-tag--teal">Bícep / Antebraço</span>
+          </div>
+          <div class="ex-right">
+            <span class="ex-sets">3×12</span>
+            <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </li>
+
+      </ul>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <button class="nav-btn nav-btn--active" aria-label="Treino" aria-current="page">
+          <span class="nav-emoji">🏋️</span>
+        </button>
+        <button class="nav-btn" aria-label="Corrida">
+          <span class="nav-emoji">👟</span>
+        </button>
+        <button class="nav-btn" aria-label="AI Coach" onclick="location.href='ai-coach.html'">
+          <span class="nav-emoji">🤖</span>
+        </button>
+        <button class="nav-btn" aria-label="Perfil">
+          <span class="nav-emoji">👤</span>
+        </button>
+      </nav>
+
+    </section>
+  </main>
+
+  <!-- Modal painel de exercício -->
+  <div class="modal-overlay" id="modal-overlay" aria-hidden="true">
+    <div class="modal-sheet" id="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-ex-name">
+
+      <div class="modal-handle"></div>
+
+      <!-- Hero colorido com nome do exercício -->
+      <div class="modal-hero" id="modal-hero">
+        <span class="modal-hero-emoji" id="modal-emoji">🏋️</span>
+        <div class="modal-hero-info">
+          <h2 class="modal-ex-name" id="modal-ex-name">–</h2>
+          <div class="modal-hero-sub">
+            <span class="modal-muscle-chip" id="modal-muscle-chip">–</span>
+            <span class="modal-sets-badge" id="modal-sets-badge">–</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Speech bubble -->
+        <div class="speech-bubble">
+          <p id="modal-desc">–</p>
+        </div>
+
+        <h3 class="modal-section-title">📋 Registo da sessão</h3>
+
+        <div class="log-table">
+          <div class="log-header">
+            <span>#</span>
+            <span>Reps feitas</span>
+            <span>Peso (kg)</span>
+          </div>
+          <div class="log-rows" id="log-rows"></div>
+        </div>
+
+        <button class="save-btn" id="save-btn">Guardar registo</button>
+
+      </div>
+
+      <button class="modal-close" id="modal-close" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+    </div>
+  </div>
+
+  <script src="/env.js"></script>
+  <script type="module" src="../js/activity.js"></script>
+  <script src="../js/sw-register.js"></script>
+</body>
+
+</html>

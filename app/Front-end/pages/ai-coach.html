@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gym App | AI Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#FFD500" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+</head>
+<body>
+
+  <main class="app-page">
+    <section class="app-screen">
+
+      <!-- Header -->
+      <header class="act-header">
+        <p class="act-greeting">🤖 AI COACH</p>
+        <button class="act-avatar-btn" aria-label="Perfil" onclick="location.href='../index.html'">
+          <span class="avatar-ring"><span class="avatar-initials">JO</span></span>
+          <span class="avatar-status" aria-hidden="true"></span>
+        </button>
+      </header>
+
+      <!-- Tabs -->
+      <div class="ai-tabs">
+        <button class="ai-tab ai-tab--active" data-tab="chat">💬 Chat</button>
+        <button class="ai-tab" data-tab="photo">📸 Análise Física</button>
+      </div>
+
+      <!-- ── Chat Panel ───────────────────────────── -->
+      <div class="ai-panel" id="panel-chat">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-msg chat-msg--ai">
+            <div class="chat-bubble">
+              Olá! Sou o teu <strong>AI Coach</strong> 💪<br><br>
+              Posso ajudar-te com planos de treino, técnica de exercícios, nutrição e motivação. O que precisas hoje?
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input id="chat-input" type="text" placeholder="Pergunta ao teu coach..." autocomplete="off" />
+          <button id="chat-send" aria-label="Enviar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Photo Panel ──────────────────────────── -->
+      <div class="ai-panel ai-panel--hidden" id="panel-photo">
+        <p class="ai-panel-desc">Envia uma foto e a AI analisa o teu desenvolvimento físico, identificando onde deves dar mais ênfase no treino.</p>
+
+        <label class="photo-upload-area" id="photo-label">
+          <input type="file" id="photo-input" accept="image/*" capture="environment" />
+          <div class="photo-placeholder" id="photo-placeholder">
+            <span class="photo-placeholder-icon">📷</span>
+            <span>Toca para tirar foto ou escolher da galeria</span>
+          </div>
+          <img class="photo-preview" id="photo-preview" alt="Preview" />
+        </label>
+
+        <button class="analyze-btn" id="analyze-btn" disabled>ANALISAR</button>
+
+        <div class="analysis-result" id="analysis-result"></div>
+      </div>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <button class="nav-btn" aria-label="Treino" onclick="location.href='activity.html'">
+          <span class="nav-emoji">🏋️</span>
+        </button>
+        <button class="nav-btn" aria-label="Corrida">
+          <span class="nav-emoji">👟</span>
+        </button>
+        <button class="nav-btn nav-btn--active" aria-label="AI Coach" aria-current="page">
+          <span class="nav-emoji">🤖</span>
+        </button>
+        <button class="nav-btn" aria-label="Perfil" onclick="location.href='../index.html'">
+          <span class="nav-emoji">👤</span>
+        </button>
+      </nav>
+
+    </section>
+  </main>
+
+  <script src="/env.js"></script>
+  <script type="module" src="../js/ai-coach.js"></script>
+  <script src="../js/sw-register.js"></script>
+</body>
+</html>

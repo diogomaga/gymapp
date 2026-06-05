@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gym App | Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="manifest" href="../manifest.json" />
+    <meta name="theme-color" content="#FFD500" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GymApp" />
+    <link rel="apple-touch-icon" href="../icons/icon.svg" />
+  </head>
+  <body>
+
+    <main class="app-page">
+      <section class="app-screen">
+
+        <!-- Brand / Hero -->
+        <div class="login-brand">
+          <div class="login-logo">
+            <span class="login-logo-mark">G</span>
+            <span class="login-logo-text">GYM APP</span>
+          </div>
+          <div class="login-hero">
+            <h1 class="login-title">BEM-VINDO<br><em>DE VOLTA</em></h1>
+            <p class="login-sub">O teu treino começa aqui.</p>
+          </div>
+        </div>
+
+        <!-- Form Panel -->
+        <div class="login-panel">
+          <form id="login-form" class="login-form" novalidate>
+
+            <label class="lfield" id="name-field" hidden>
+              <span>Nome</span>
+              <input id="name" name="name" type="text" placeholder="O teu nome" autocomplete="name" />
+            </label>
+
+            <label class="lfield">
+              <span>Email</span>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="email@exemplo.com"
+                autocomplete="email"
+                required
+              />
+            </label>
+
+            <label class="lfield">
+              <span>Password</span>
+              <div class="lpassword-field">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="A tua password"
+                  autocomplete="current-password"
+                  required
+                />
+                <button id="toggle-password" type="button">Ver</button>
+              </div>
+            </label>
+
+            <div class="lform-options">
+              <label class="lremember">
+                <input type="checkbox" name="remember" />
+                <span>Lembrar-me</span>
+              </label>
+              <a href="#">Esqueci a password</a>
+            </div>
+
+            <button class="lsubmit-btn" type="submit">ENTRAR</button>
+            <p id="form-message" class="lform-message" aria-live="polite"></p>
+
+          </form>
+
+          <p class="lsignup-text">
+            Ainda não tens conta? <a href="#" id="toggle-mode">Criar conta</a>
+          </p>
+        </div>
+
+      </section>
+    </main>
+
+    <script src="/env.js"></script>
+    <script type="module" src="../js/login.js"></script>
+    <script src="../js/sw-register.js"></script>
+  </body>
+</html>
