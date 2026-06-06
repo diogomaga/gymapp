@@ -50,12 +50,16 @@ form.addEventListener('submit', async (e) => {
   submitBtn.textContent = isSignup ? 'A CRIAR CONTA…' : 'A ENTRAR…';
   formMessage.textContent = '';
 
-  const { error } = isSignup
+  const result = isSignup
     ? await signUp(email, password, name)
     : await signIn(email, password);
 
-  if (error) {
-    formMessage.textContent = translateError(error.message);
+  console.log('Auth result:', result);
+
+  if (result.error) {
+    const errorMsg = result.error.message || JSON.stringify(result.error);
+    console.error('Auth error:', errorMsg);
+    formMessage.textContent = translateError(errorMsg);
     submitBtn.disabled = false;
     submitBtn.textContent = isSignup ? 'CRIAR CONTA' : 'ENTRAR';
     return;
