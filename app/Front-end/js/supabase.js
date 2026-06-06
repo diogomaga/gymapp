@@ -6,130 +6,243 @@ const SUPABASE_KEY  = window.ENV_SUPABASE_KEY || 'sb_publishable_aVjht0ulBEZ5VpY
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── Mock Auth (para testes locais) ──────────────────────
-let mockUser = JSON.parse(localStorage.getItem('mockUser'));
+// ── Auth helpers ──────────────────────────────────────
 
 export async function signUp(email, password, name) {
-  if (!email || !password || !name) {
-    return { error: { message: 'Preenche todos os campos' } };
+  try {
+    // 1. Faz signup
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name }
+      }
+    });
+
+    if (error) {
+      console.error('Signup error:', error);
+      return { data: null, error };
+    }
+
+    // 2. Cria o perfil manualmente se o trigger não funcionar
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: data.user.id,
+          name: name || 'Utilizador'
+        }, { onConflict: 'id' });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+      }
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error('Signup exception:', err);
+    return { data: null, error: err };
   }
-
-  mockUser = {
-    id: 'mock-' + Date.now(),
-    email,
-    user_metadata: { name },
-    created_at: new Date().toISOString()
-  };
-
-  localStorage.setItem('mockUser', JSON.stringify(mockUser));
-  localStorage.setItem('mockPassword', password);
-
-  return { data: { user: mockUser }, error: null };
 }
 
 export async function signIn(email, password) {
-  const stored = JSON.parse(localStorage.getItem('mockUser'));
-  const storedPassword = localStorage.getItem('mockPassword');
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-  if (!stored || stored.email !== email || storedPassword !== password) {
-    return { error: { message: 'Email ou password incorretos' } };
+    if (error) {
+      console.error('Sign in error:', error);
+      return { data: null, error };
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error('Sign in exception:', err);
+    return { data: null, error: err };
   }
-
-  mockUser = stored;
-  return { data: { user: mockUser }, error: null };
 }
 
 export async function signOut() {
-  mockUser = null;
-  localStorage.removeItem('mockUser');
-  localStorage.removeItem('mockPassword');
+  await supabase.auth.signOut();
   window.location.href = '/index.html';
 }
 
 export async function getUser() {
-  if (!mockUser) {
-    mockUser = JSON.parse(localStorage.getItem('mockUser'));
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) console.error('Get user error:', error);
+    return user;
+  } catch (err) {
+    console.error('Get user exception:', err);
+    return null;
   }
-  return mockUser;
 }
 
 export async function getProfile() {
   const user = await getUser();
   if (!user) return null;
 
-  return {
-    id: user.id,
-    name: user.user_metadata?.name || 'Utilizador',
-    created_at: user.created_at
-  };
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Get profile error:', error);
+    }
+
+    return data || {
+      id: user.id,
+      name: user.user_metadata?.name || 'Utilizador'
+    };
+  } catch (err) {
+    console.error('Get profile exception:', err);
+    return {
+      id: user.id,
+      name: user.user_metadata?.name || 'Utilizador'
+    };
+  }
 }
 
 // ── Workout helpers ───────────────────────────────────
 
 export async function saveWorkoutSession({ name, duration_min, exercises }) {
-  // Mock: guardar em localStorage
-  const sessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
-  const session = {
-    id: 'session-' + Date.now(),
-    user_id: mockUser?.id,
-    name,
-    duration_min,
-    exercises,
-    created_at: new Date().toISOString()
-  };
-  sessions.push(session);
-  localStorage.setItem('workoutSessions', JSON.stringify(sessions));
+  const user = await getUser();
+  if (!user) return { error: 'Não autenticado' };
 
-  return { data: session };
+  try {
+    const { data: session, error } = await supabase
+      .from('workout_sessions')
+      .insert({ user_id: user.id, name, duration_min })
+      .select()
+      .single();
+
+    if (error) return { error };
+
+    for (const ex of exercises) {
+      const { data: sessionEx } = await supabase
+        .from('session_exercises')
+        .insert({ session_id: session.id, exercise_name: ex.name, muscle_group: ex.muscle })
+        .select()
+        .single();
+
+      if (sessionEx && ex.sets?.length) {
+        const setsData = ex.sets.map((s, i) => ({
+          exercise_id: sessionEx.id,
+          set_number: i + 1,
+          reps: s.reps || null,
+          weight_kg: s.weight || null,
+        }));
+        await supabase.from('exercise_sets').insert(setsData);
+      }
+    }
+
+    return { data: session };
+  } catch (err) {
+    console.error('Save workout error:', err);
+    return { error: err };
+  }
 }
 
 export async function getWorkoutHistory(limit = 10) {
-  const sessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
-  return sessions.filter(s => s.user_id === mockUser?.id).slice(-limit);
+  const user = await getUser();
+  if (!user) return [];
+
+  try {
+    const { data } = await supabase
+      .from('workout_sessions')
+      .select('*, session_exercises(*, exercise_sets(*))')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    return data || [];
+  } catch (err) {
+    console.error('Get workout history error:', err);
+    return [];
+  }
 }
 
 // ── Chat helpers ──────────────────────────────────────
 
 export async function saveChatMessage(role, content) {
-  const messages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
-  messages.push({
-    id: 'msg-' + Date.now(),
-    user_id: mockUser?.id,
-    role,
-    content,
-    created_at: new Date().toISOString()
-  });
-  localStorage.setItem('chatMessages', JSON.stringify(messages));
+  const user = await getUser();
+  if (!user) return;
+
+  try {
+    await supabase
+      .from('chat_messages')
+      .insert({ user_id: user.id, role, content });
+  } catch (err) {
+    console.error('Save chat message error:', err);
+  }
 }
 
 export async function getChatHistory(limit = 50) {
-  const messages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
-  return messages.filter(m => m.user_id === mockUser?.id).slice(-limit);
+  const user = await getUser();
+  if (!user) return [];
+
+  try {
+    const { data } = await supabase
+      .from('chat_messages')
+      .select('role, content')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+      .limit(limit);
+    return data || [];
+  } catch (err) {
+    console.error('Get chat history error:', err);
+    return [];
+  }
 }
 
 // ── Progress photos helpers ───────────────────────────
 
 export async function uploadProgressPhoto(file, analysis) {
-  const photos = JSON.parse(localStorage.getItem('progressPhotos') || '[]');
+  const user = await getUser();
+  if (!user) return { error: 'Não autenticado' };
 
-  const reader = new FileReader();
-  return new Promise((resolve) => {
-    reader.onload = (e) => {
-      photos.push({
-        id: 'photo-' + Date.now(),
-        user_id: mockUser?.id,
-        photo_url: e.target.result,
-        ai_analysis: analysis,
-        created_at: new Date().toISOString()
-      });
-      localStorage.setItem('progressPhotos', JSON.stringify(photos));
-      resolve({ data: photos[photos.length - 1] });
-    };
-    reader.readAsDataURL(file);
-  });
+  try {
+    const fileName = `${user.id}/${Date.now()}.jpg`;
+    const { error: uploadError } = await supabase.storage
+      .from('progress-photos')
+      .upload(fileName, file, { contentType: file.type });
+
+    if (uploadError) return { error: uploadError };
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('progress-photos')
+      .getPublicUrl(fileName);
+
+    const { data, error } = await supabase
+      .from('progress_photos')
+      .insert({ user_id: user.id, photo_url: publicUrl, ai_analysis: analysis })
+      .select()
+      .single();
+
+    return { data, error };
+  } catch (err) {
+    console.error('Upload progress photo error:', err);
+    return { error: err };
+  }
 }
 
 export async function getProgressPhotos() {
-  const photos = JSON.parse(localStorage.getItem('progressPhotos') || '[]');
-  return photos.filter(p => p.user_id === mockUser?.id);
+  const user = await getUser();
+  if (!user) return [];
+
+  try {
+    const { data } = await supabase
+      .from('progress_photos')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    return data || [];
+  } catch (err) {
+    console.error('Get progress photos error:', err);
+    return [];
+  }
 }
