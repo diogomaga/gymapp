@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gym App | Filmes & Séries</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#FFD500" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <style>
+    .movie-search {
+      display: flex;
+      gap: 8px;
+      padding: 0 20px 16px;
+    }
+
+    .movie-search input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 2.5px solid var(--ink);
+      border-radius: 8px;
+      font: inherit;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .movie-search button {
+      padding: 10px 16px;
+      background: var(--yellow);
+      border: 2.5px solid var(--ink);
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .movie-search button:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .movie-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 0 20px 12px;
+      border-bottom: 2.5px solid var(--ink);
+    }
+
+    .movie-tab {
+      padding: 8px 16px;
+      background: transparent;
+      border: 2.5px solid var(--ink);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .movie-tab--active {
+      background: var(--yellow);
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .movie-player-container {
+      padding: 16px 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .movie-player {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border: 2.5px solid var(--ink);
+      border-radius: 12px;
+      background: #000;
+      overflow: hidden;
+      box-shadow: 4px 4px 0 var(--ink);
+    }
+
+    .movie-player iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .movie-suggestions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+
+    .movie-card {
+      padding: 12px;
+      background: var(--panel-bg);
+      border: 2.5px solid var(--ink);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .movie-card:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--ink);
+      background: var(--yellow-lit);
+    }
+
+    .movie-card-emoji {
+      font-size: 2rem;
+      margin-bottom: 4px;
+    }
+
+    .movie-card-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 2px;
+    }
+
+    .movie-card-type {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .movie-player-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: var(--muted);
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="app-page">
+    <section class="app-screen">
+
+      <!-- Header -->
+      <header class="act-header">
+        <p class="act-greeting">🎬 FILMES & SÉRIES</p>
+        <button class="act-avatar-btn" aria-label="Perfil" onclick="location.href='../index.html'">
+          <span class="avatar-ring"><span class="avatar-initials">JO</span></span>
+          <span class="avatar-status" aria-hidden="true"></span>
+        </button>
+      </header>
+
+      <!-- Tabs -->
+      <div class="movie-tabs">
+        <button class="movie-tab movie-tab--active" data-type="filme">🍿 Filmes</button>
+        <button class="movie-tab" data-type="serie">📺 Séries</button>
+      </div>
+
+      <!-- Search -->
+      <div class="movie-search">
+        <input
+          id="movie-id"
+          type="text"
+          placeholder="TMDb ID ou IMDb (tt...)"
+          autocomplete="off"
+        />
+        <button id="movie-search-btn">Carregar</button>
+      </div>
+
+      <!-- Player -->
+      <div class="movie-player-container">
+        <div class="movie-player" id="movie-player">
+          <div class="movie-player-empty">Selecciona um filme ou série</div>
+        </div>
+      </div>
+
+      <!-- Sugestões -->
+      <div class="movie-suggestions" id="suggestions">
+        <!-- Preenchido por JS -->
+      </div>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <button class="nav-btn" aria-label="Treino" onclick="location.href='activity.html'">
+          <span class="nav-emoji">🏋️</span>
+        </button>
+        <button class="nav-btn" aria-label="Filmes" aria-current="page" class="nav-btn--active">
+          <span class="nav-emoji">🎬</span>
+        </button>
+        <button class="nav-btn" aria-label="AI Coach" onclick="location.href='ai-coach.html'">
+          <span class="nav-emoji">🤖</span>
+        </button>
+        <button class="nav-btn" aria-label="Perfil" onclick="location.href='../index.html'">
+          <span class="nav-emoji">👤</span>
+        </button>
+      </nav>
+
+    </section>
+  </main>
+
+  <script src="../js/movies.js"></script>
+  <script src="../js/sw-register.js"></script>
+</body>
+</html>
