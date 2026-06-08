@@ -16,7 +16,8 @@
     .movie-search {
       display: flex;
       gap: 8px;
-      padding: 0 20px 16px;
+      padding: 12px 20px;
+      background: var(--panel-bg);
     }
 
     .movie-search input {
@@ -65,10 +66,22 @@
       box-shadow: 3px 3px 0 var(--ink);
     }
 
+    .movie-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
     .movie-player-container {
       padding: 16px 20px;
       flex: 1;
       overflow-y: auto;
+      display: none;
+    }
+
+    .movie-player-container.active {
+      display: block;
     }
 
     .movie-player {
@@ -87,53 +100,61 @@
       border: none;
     }
 
-    .movie-suggestions {
+    .movie-results {
+      padding: 12px 20px;
+      flex: 1;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .movie-results.active {
+      display: block;
+    }
+
+    .movie-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      padding: 16px 20px;
     }
 
-    .movie-card {
-      padding: 12px;
-      background: var(--panel-bg);
-      border: 2.5px solid var(--ink);
-      border-radius: 8px;
+    .movie-item {
       cursor: pointer;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2.5px solid var(--ink);
       transition: all 0.2s;
-      text-align: center;
+      aspect-ratio: 2/3;
     }
 
-    .movie-card:hover {
+    .movie-item:hover {
       transform: translate(2px, 2px);
       box-shadow: 2px 2px 0 var(--ink);
-      background: var(--yellow-lit);
     }
 
-    .movie-card-emoji {
-      font-size: 2rem;
-      margin-bottom: 4px;
+    .movie-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .movie-card-title {
-      font-weight: 700;
-      font-size: 0.85rem;
-      margin-bottom: 2px;
-    }
-
-    .movie-card-type {
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    .movie-player-empty {
+    .movie-item-loading {
+      background: var(--panel-bg);
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 300px;
       color: var(--muted);
+    }
+
+    .movie-empty {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .movie-loading {
       text-align: center;
       padding: 20px;
+      color: var(--muted);
     }
   </style>
 </head>
@@ -153,31 +174,34 @@
 
       <!-- Tabs -->
       <div class="movie-tabs">
-        <button class="movie-tab movie-tab--active" data-type="filme">🍿 Filmes</button>
-        <button class="movie-tab" data-type="serie">📺 Séries</button>
+        <button class="movie-tab movie-tab--active" data-type="movie">🍿 Filmes</button>
+        <button class="movie-tab" data-type="tv">📺 Séries</button>
       </div>
 
       <!-- Search -->
       <div class="movie-search">
         <input
-          id="movie-id"
+          id="movie-search"
           type="text"
-          placeholder="TMDb ID ou IMDb (tt...)"
+          placeholder="Procura um filme ou série..."
           autocomplete="off"
         />
-        <button id="movie-search-btn">Carregar</button>
+        <button id="movie-search-btn">🔍</button>
       </div>
 
-      <!-- Player -->
-      <div class="movie-player-container">
-        <div class="movie-player" id="movie-player">
-          <div class="movie-player-empty">Selecciona um filme ou série</div>
+      <!-- Content -->
+      <div class="movie-content">
+        <!-- Player -->
+        <div class="movie-player-container" id="player-container">
+          <div class="movie-player" id="movie-player">
+            <div style="padding: 20px; color: #999;">Selecciona um filme ou série</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Sugestões -->
-      <div class="movie-suggestions" id="suggestions">
-        <!-- Preenchido por JS -->
+        <!-- Results -->
+        <div class="movie-results active" id="results-container">
+          <div class="movie-empty">Procura por um filme ou série</div>
+        </div>
       </div>
 
       <!-- Bottom Nav -->
@@ -185,7 +209,7 @@
         <button class="nav-btn" aria-label="Treino" onclick="location.href='activity.html'">
           <span class="nav-emoji">🏋️</span>
         </button>
-        <button class="nav-btn" aria-label="Filmes" aria-current="page" class="nav-btn--active">
+        <button class="nav-btn nav-btn--active" aria-label="Filmes" aria-current="page">
           <span class="nav-emoji">🎬</span>
         </button>
         <button class="nav-btn" aria-label="AI Coach" onclick="location.href='ai-coach.html'">
@@ -199,6 +223,7 @@
     </section>
   </main>
 
+  <script src="/env.js"></script>
   <script src="../js/movies.js"></script>
   <script src="../js/sw-register.js"></script>
 </body>

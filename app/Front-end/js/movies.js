@@ -1,28 +1,15 @@
-// ── Sugestões pré-definidas ──────────────────────────
-const suggestions = {
-  filme: [
-    { title: 'Clube da Luta', tmdb: 550, emoji: '🤜' },
-    { title: 'Inception', tmdb: 27205, emoji: '🌀' },
-    { title: 'Matrix', tmdb: 603, emoji: '💊' },
-    { title: 'Interestelar', tmdb: 157336, emoji: '🚀' },
-  ],
-  serie: [
-    { title: 'Breaking Bad', tmdb: 1396, emoji: '⚗️' },
-    { title: 'The Office', tmdb: 18594, emoji: '📎' },
-    { title: 'Game of Thrones', tmdb: 1399, emoji: '👑' },
-    { title: 'Stranger Things', tmdb: 66732, emoji: '🔴' },
-  ]
-};
+const TMDB_KEY = window.ENV_TMDB_KEY || '';
+const BASE_EMBED = 'https://myembed.biz';
+const TMDB_IMG = 'https://image.tmdb.org/t/p/w342';
 
-let currentType = 'filme';
-const BASE_URL = 'https://myembed.biz';
+let currentType = 'movie';
+let searchTimeout;
 
-// ── Elements ──────────────────────────────────────────
 const tabs = document.querySelectorAll('.movie-tab');
-const idInput = document.getElementById('movie-id');
+const searchInput = document.getElementById('movie-search');
 const searchBtn = document.getElementById('movie-search-btn');
-const playerContainer = document.getElementById('movie-player');
-const suggestionsContainer = document.getElementById('suggestions');
+const playerContainer = document.getElementById('player-container');
+const resultsContainer = document.getElementById('results-container');
 
 // ── Tab switching ─────────────────────────────────────
 tabs.forEach(tab => {
@@ -30,33 +17,84 @@ tabs.forEach(tab => {
     tabs.forEach(t => t.classList.remove('movie-tab--active'));
     tab.classList.add('movie-tab--active');
     currentType = tab.dataset.type;
-    idInput.value = '';
-    idInput.placeholder = currentType === 'filme'
-      ? 'TMDb ID (550) ou IMDb (tt0137523)'
-      : 'TMDb ID (1396) ou IMDb (tt0903747)';
-    renderSuggestions();
-    clearPlayer();
+    searchInput.value = '';
+    searchInput.placeholder = currentType === 'movie'
+      ? 'Procura um filme...'
+      : 'Procura uma série...';
+    clearResults();
   });
 });
 
-// ── Render suggestions ────────────────────────────────
-function renderSuggestions() {
-  const items = suggestions[currentType];
-  suggestionsContainer.innerHTML = items.map(item => `
-    <div class="movie-card" onclick="loadMovie('${item.tmdb}')">
-      <div class="movie-card-emoji">${item.emoji}</div>
-      <div class="movie-card-title">${item.title}</div>
-      <div class="movie-card-type">${currentType === 'filme' ? '🍿 Filme' : '📺 Série'}</div>
+// ── Search ────────────────────────────────────────────
+async function searchMovies(query) {
+  if (!query.trim()) {
+    clearResults();
+    return;
+  }
+
+  if (!TMDB_KEY) {
+    showError('TMDb API key não configurada');
+    return;
+  }
+
+  resultsContainer.innerHTML = '<div class="movie-loading">A procurar...</div>';
+
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/search/${currentType}?query=${encodeURIComponent(query)}&api_key=${TMDB_KEY}`
+    );
+
+    if (!response.ok) {
+      throw new Error('Erro ao procurar');
+    }
+
+    const data = await response.json();
+    displayResults(data.results || []);
+  } catch (err) {
+    showError('Erro ao procurar: ' + err.message);
+  }
+}
+
+// ── Display results ───────────────────────────────────
+function displayResults(results) {
+  if (results.length === 0) {
+    resultsContainer.innerHTML = '<div class="movie-empty">Nenhum resultado encontrado</div>';
+    return;
+  }
+
+  const filtered = results.filter(item => {
+    const poster = currentType === 'movie' ? item.poster_path : item.poster_path;
+    return poster; // Só mostra items com poster
+  });
+
+  if (filtered.length === 0) {
+    resultsContainer.innerHTML = '<div class="movie-empty">Nenhuma imagem disponível</div>';
+    return;
+  }
+
+  resultsContainer.innerHTML = `
+    <div class="movie-grid">
+      ${filtered.map(item => `
+        <div class="movie-item" onclick="loadMedia(${item.id})">
+          <img
+            src="${TMDB_IMG}${item.poster_path}"
+            alt="${item.title || item.name}"
+            loading="lazy"
+          />
+        </div>
+      `).join('')}
     </div>
-  `).join('');
+  `;
 }
 
 // ── Load movie/series ─────────────────────────────────
-function loadMovie(id) {
-  if (!id) return;
+function loadMedia(tmdbId) {
+  const url = `${BASE_EMBED}/${currentType === 'movie' ? 'filme' : 'serie'}/${tmdbId}`;
 
-  const url = `${BASE_URL}/${currentType}/${id}`;
-  playerContainer.innerHTML = `
+  playerContainer.classList.add('active');
+  resultsContainer.classList.remove('active');
+
+  document.getElementById('movie-player').innerHTML = `
     <iframe
       src="${url}"
       frameborder="0"
@@ -66,29 +104,51 @@ function loadMovie(id) {
   `;
 
   // Scroll to player
-  playerContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  setTimeout(() => {
+    playerContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
 }
 
-// ── Clear player ──────────────────────────────────────
-function clearPlayer() {
-  playerContainer.innerHTML = '<div class="movie-player-empty">Selecciona um filme ou série</div>';
+// ── Clear results ─────────────────────────────────────
+function clearResults() {
+  playerContainer.classList.remove('active');
+  resultsContainer.classList.add('active');
+  resultsContainer.innerHTML = '<div class="movie-empty">Procura por um filme ou série</div>';
+  document.getElementById('movie-player').innerHTML = '<div style="padding: 20px; color: #999;">Selecciona um filme ou série</div>';
 }
 
-// ── Search button ─────────────────────────────────────
+// ── Show error ────────────────────────────────────────
+function showError(msg) {
+  resultsContainer.innerHTML = `<div class="movie-empty">${msg}</div>`;
+}
+
+// ── Event listeners ───────────────────────────────────
 searchBtn.addEventListener('click', () => {
-  const id = idInput.value.trim();
-  if (id) {
-    loadMovie(id);
-  }
+  searchMovies(searchInput.value);
 });
 
-// ── Enter key ─────────────────────────────────────────
-idInput.addEventListener('keydown', e => {
+searchInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
-    const id = idInput.value.trim();
-    if (id) loadMovie(id);
+    searchMovies(searchInput.value);
   }
 });
 
-// ── Initialize ────────────────────────────────────────
-renderSuggestions();
+// Debounced search
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  if (searchInput.value.length > 2) {
+    searchTimeout = setTimeout(() => {
+      searchMovies(searchInput.value);
+    }, 500);
+  }
+});
+
+// Show welcome message if no key
+if (!TMDB_KEY) {
+  resultsContainer.innerHTML = `
+    <div class="movie-empty">
+      <p>⚠️ TMDb API key não configurada</p>
+      <p style="font-size: 0.85rem; margin-top: 12px;">Adiciona TMDB_API_KEY no .env para procurar filmes</p>
+    </div>
+  `;
+}

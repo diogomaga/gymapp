@@ -15,13 +15,14 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../app/Front-end')));
 
-// Injeta variáveis públicas no frontend (sem expor a Gemini key)
+// Injeta variáveis públicas no frontend
 app.get('/env.js', (_req, res) => {
   res.type('application/javascript');
   res.send(`
     window.ENV_SUPABASE_URL  = "${process.env.SUPABASE_URL || ''}";
     window.ENV_SUPABASE_KEY  = "${process.env.SUPABASE_ANON_KEY || ''}";
     window.ENV_GEMINI_KEY    = "${process.env.GEMINI_API_KEY || ''}";
+    window.ENV_TMDB_KEY      = "${process.env.TMDB_API_KEY || ''}";
   `);
 });
 
